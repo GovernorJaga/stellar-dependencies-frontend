@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "node --check public/app.js"
+    "check": "node --check public/app.js && node --check public/copy.js && node --check public/results-controls.js && node --check public/import.js"
   },
   "license": "MIT"
 }
