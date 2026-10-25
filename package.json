@@ -10,7 +10,7 @@
   "scripts": {
     "check": "node --check public/app.js",
     "check:errors": "node --check public/app.js && node --test test/error-classification.test.js",
-    "test": "node --test test/error-classification.test.js"
+    "test": "node --test test/"
   },
   "license": "MIT"
 }
