@@ -19,10 +19,21 @@ This repository is one of three:
 ## Project structure
 
 - `public/`: HTML, styles, browser logic and exports.
+- `scripts/serve.js`: zero-dependency local static server for `public/`.
 
 ```sh
+npm start       # serve public/ locally at http://localhost:3000
 npm run check   # JavaScript syntax check
 ```
+
+## Local development
+
+`npm start` runs a small static server written for Node 22 using only the standard library, so **no `npm install` is required**. It serves the contents of `public/` as the site root.
+
+- **Port.** Listens on port `3000` by default; set `PORT` to override, e.g. `PORT=8080 npm start`.
+- **Path traversal.** Request paths are resolved inside `public/`; any attempt to escape that directory (for example `../` sequences or encoded variants) is rejected with `403 Forbidden`.
+- **SPA fallback.** Unknown paths that do not map to a file are served `index.html` with `200 OK`, matching the production SPA fallback described under [Hosting](#hosting).
+=======
 
 Reports are returned by the backend to the requesting browser and are not persisted; export them to retain them.
 
