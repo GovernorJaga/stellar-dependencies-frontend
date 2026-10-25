@@ -109,6 +109,54 @@ function toCsv(rows) {
 }
 
 // ---------------------------------------------------------------------------
+// API configuration
+//
+// The backend is a separate service. Its base URL is provided by the
+// `config.js` file (loaded before this script) via `window.API_BASE_URL`.
+// Pointing the UI at a different backend therefore requires no code change —
+// only editing `config.js` (or the corresponding meta tag).
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the configured API base URL.
+ *
+ * Resolution order:
+ *   1. `window.API_BASE_URL` (set by config.js)
+ *   2. `<meta name="api-base-url" content="...">`
+ *   3. Same-origin (empty string) as a safe fallback
+ *
+ * Trailing slashes are stripped so callers can safely append `/path`.
+ *
+ * @returns {string} the base URL without a trailing slash (may be empty)
+ */
+export function getApiBaseUrl() {
+  let base = '';
+
+  if (typeof window !== 'undefined' && typeof window.API_BASE_URL === 'string') {
+    base = window.API_BASE_URL;
+  } else if (typeof document !== 'undefined') {
+    const meta = document.querySelector('meta[name="api-base-url"]');
+    if (meta) {
+      base = meta.getAttribute('content') || '';
+    }
+  }
+
+  return String(base).trim().replace(/\/+$/, '');
+}
+
+/**
+ * Build a fully-qualified API URL for the given path.
+ *
+ * @param {string} path e.g. `/api/packages/foo`
+ * @returns {string}
+ */
+export function buildApiUrl(path) {
+  const base = getApiBaseUrl();
+  const suffix = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${suffix}`;
+}
+
+// ---------------------------------------------------------------------------
 // Local sample data (fictional). No network access is ever required.
 // ---------------------------------------------------------------------------
 
@@ -397,6 +445,35 @@ if (typeof document !== 'undefined') {
   }
 
   // ---------------------------------------------------------------------------
+  // API base URL resolution
+  //
+  // The backend is a separate service. Its base URL comes from `config.js`
+  // (window.API_BASE_URL) or a `<meta name="api-base-url">` tag. No host is
+  // hardcoded here; changing the backend requires only editing config.js.
+  // ---------------------------------------------------------------------------
+
+  function resolveApiBaseUrl() {
+    var base = '';
+
+    if (typeof window !== 'undefined' && typeof window.API_BASE_URL === 'string') {
+      base = window.API_BASE_URL;
+    } else if (typeof document !== 'undefined') {
+      var meta = document.querySelector('meta[name="api-base-url"]');
+      if (meta) {
+        base = meta.getAttribute('content') || '';
+      }
+    }
+
+    return String(base).trim().replace(/\/+$/, '');
+  }
+
+  function apiUrl(path) {
+    var base = resolveApiBaseUrl();
+    var suffix = path.charAt(0) === '/' ? path : '/' + path;
+    return base + suffix;
+  }
+
+  // ---------------------------------------------------------------------------
   // Report view state
   // ---------------------------------------------------------------------------
 
@@ -567,7 +644,15 @@ if (typeof document !== 'undefined') {
   }
 
   function loadReport(url) {
-    return fetch(url)
+    var target = url;
+    // Relative URLs are resolved against the configured API base URL.
+    if (typeof url === 'string' && !/^[a-z][a-z0-9+.-]*:/i.test(url) && url.charAt(0) !== '/') {
+      target = apiUrl(url);
+    } else if (typeof url === 'string' && url.charAt(0) === '/') {
+      target = apiUrl(url);
+    }
+
+    return fetch(target)
       .then(function (response) {
         if (!response.ok) {
           throw new Error('Failed to load report: ' + response.status);
@@ -728,7 +813,7 @@ if (typeof document !== 'undefined') {
   }
 
   function fetchPackage(name, signal) {
-    var url = '/api/packages/' + encodeURIComponent(name);
+    var url = apiUrl('/api/packages/' + encodeURIComponent(name));
     return fetch(url, {
       method: 'GET',
       headers: { Accept: 'application/json' },
@@ -896,6 +981,8 @@ if (typeof document !== 'undefined') {
     renderPackage: renderPackage,
     startScan: startScan,
     cancelScan: cancelScan,
+    getApiBaseUrl: resolveApiBaseUrl,
+    buildApiUrl: apiUrl,
     getState: function () { return state.status; }
   };
 })();

@@ -8,6 +8,8 @@ const {
   exportShortlist,
   loadSampleData,
   DEMO_LABEL_TEXT,
+  resolveApiBaseUrl,
+  buildApiUrl,
 } = require('./shortlist');
 
 // ---------------------------------------------------------------------------
@@ -166,4 +168,35 @@ test('demo label is visible for every sample-data entry set', () => {
   assert.ok(result.demoLabel.visible);
   assert.strictEqual(result.demoLabel.text, DEMO_LABEL_TEXT);
   assert.match(DEMO_LABEL_TEXT, /sample|demo|fictional/i);
+});
+
+// ---------------------------------------------------------------------------
+// Configurable API base URL
+// ---------------------------------------------------------------------------
+
+test('resolveApiBaseUrl returns the configured base URL', () => {
+  const baseUrl = resolveApiBaseUrl();
+  assert.strictEqual(typeof baseUrl, 'string');
+  assert.ok(baseUrl.length > 0, 'API base URL must not be empty');
+});
+
+test('resolveApiBaseUrl does not hardcode a host', () => {
+  const baseUrl = resolveApiBaseUrl();
+  assert.doesNotMatch(
+    baseUrl,
+    /localhost|127\.0\.0\.1/,
+    'API base URL must come from configuration, not a hardcoded host'
+  );
+});
+
+test('buildApiUrl joins the configured base URL with a path', () => {
+  const url = buildApiUrl('/shortlist');
+  assert.ok(url.startsWith(resolveApiBaseUrl()));
+  assert.match(url, /\/shortlist$/);
+});
+
+test('buildApiUrl tolerates trailing slashes in the base URL', () => {
+  const url = buildApiUrl('shortlist');
+  assert.doesNotMatch(url, /\/\/shortlist/, 'must not produce double slashes');
+  assert.match(url, /\/shortlist$/);
 });

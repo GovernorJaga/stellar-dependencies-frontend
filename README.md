@@ -59,8 +59,36 @@ The UI is a static site that talks to a separate API origin. It can be served fr
    - Netlify: `/* /index.html 200` in `_redirects`
    - Vercel: a rewrite of `/(.*)` to `/index.html`
    - GitHub Pages: copy `index.html` to `404.html`
-3. **API origin.** The UI calls the backend at a separate origin. Set the API base URL at deploy time (build/runtime config) and allow that origin in the CSP `connect-src` below.
+3. **API origin.** The UI calls the backend at a separate origin. Configure the API base URL as described under [API base URL configuration](#api-base-url-configuration) and allow that origin in the CSP `connect-src` below.
 4. **HTTPS only.** Serve the site over HTTPS so the API origin and all rendered `https:` links work without mixed-content warnings.
+
+## API base URL configuration
+
+The UI does not hardcode a backend host. The API base URL is read from a small runtime config, so pointing the UI at a different backend needs **no code change** — only a config edit.
+
+The config lives in `public/config.js`, which is loaded before the browser logic:
+
+```js
+// public/config.js
+window.DEPENDENCYLENS_CONFIG = {
+  // Base URL of the backend API, without a trailing slash.
+  // Leave empty to call the API on the same origin as the UI.
+  apiBaseUrl: 'https://api.example.com',
+};
+```
+
+- **Same origin.** Set `apiBaseUrl` to `''` (or omit it) to call the API on the UI's own origin.
+- **Separate backend.** Set `apiBaseUrl` to the backend origin, e.g. `https://api.example.com`. Do not add a trailing slash.
+- **Per environment.** Keep one `config.js` per environment (local, staging, production) and publish the matching file with the rest of `public/` at deploy time. Because it is a plain static file, it can also be swapped on the host without rebuilding.
+- **Meta tag alternative.** If you prefer not to ship a config file, provide the value through a meta tag in `index.html` instead:
+
+  ```html
+  <meta name="dependencies-api-base-url" content="https://api.example.com" />
+  ```
+
+  The UI uses the meta tag when `window.DEPENDENCYLENS_CONFIG.apiBaseUrl` is not set.
+
+When you change the API origin, also update the CSP `connect-src` entry below to match.
 
 ## Content-Security-Policy
 
@@ -83,7 +111,7 @@ Content-Security-Policy:
 
 Notes:
 
-- `connect-src` must list the API origin; add any additional API origins you use.
+- `connect-src` must list the API origin configured in `public/config.js` (or the meta tag); add any additional API origins you use.
 - `script-src 'self'` assumes no inline scripts; keep browser logic in external files.
 - `object-src 'none'`, `base-uri 'none'` and `frame-ancestors 'none'` block plugin, base-tag and framing attacks.
 - Tighten `img-src`/`font-src` if you do not use data URIs or self-hosted fonts.

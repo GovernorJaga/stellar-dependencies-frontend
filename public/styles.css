@@ -49,6 +49,9 @@
     Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+
+  /* Asset paths (relative to public/) */
+  --asset-path: /assets;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -178,6 +181,13 @@ pre code {
 img,
 svg,
 video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Assets imported from the monorepo live under public/assets */
+img[src^="assets/"],
+img[src^="./assets/"] {
   max-width: 100%;
   height: auto;
 }

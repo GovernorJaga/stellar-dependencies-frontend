@@ -37,8 +37,34 @@
       'Treat each repository URL as a lead to review rather than proof of ownership.'
   };
 
+  // Resolve the API base URL from the shared config (see public/config.js).
+  // No hardcoded hosts: the backend location is configurable without code changes.
+  function getApiBaseUrl() {
+    var cfg = global.AppConfig;
+    if (cfg && typeof cfg.apiBaseUrl === 'string' && cfg.apiBaseUrl) {
+      return cfg.apiBaseUrl;
+    }
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn(
+        'AppConfig.apiBaseUrl is not set; falling back to same-origin API calls.'
+      );
+    }
+    return '';
+  }
+
+  function apiUrl(path) {
+    var base = getApiBaseUrl();
+    var suffix = String(path || '');
+    if (suffix && suffix.charAt(0) !== '/') {
+      suffix = '/' + suffix;
+    }
+    return base + suffix;
+  }
+
   var copy = {
-    repositoryMapping: repositoryMapping
+    repositoryMapping: repositoryMapping,
+    getApiBaseUrl: getApiBaseUrl,
+    apiUrl: apiUrl
   };
 
   // ---------------------------------------------------------------------------

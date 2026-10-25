@@ -3,6 +3,19 @@
 
   var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
+  function getApiBaseUrl() {
+    if (typeof window !== 'undefined' && window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl) {
+      return String(window.APP_CONFIG.apiBaseUrl).replace(/\/+$/, '');
+    }
+    return '';
+  }
+
+  function buildApiUrl(path) {
+    var base = getApiBaseUrl();
+    var normalizedPath = path.charAt(0) === '/' ? path : '/' + path;
+    return base + normalizedPath;
+  }
+
   function isPlainObject(value) {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
@@ -184,6 +197,8 @@
 
   var api = {
     MAX_FILE_SIZE: MAX_FILE_SIZE,
+    getApiBaseUrl: getApiBaseUrl,
+    buildApiUrl: buildApiUrl,
     validateReport: validateReport,
     handleFile: handleFile,
     createImportControl: createImportControl

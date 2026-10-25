@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "check": "node --check public/app.js && node --check public/copy.js && node --check public/results-controls.js && node --check public/import.js",
-    "check:errors": "node --check public/app.js && node --test test/error-classification.test.js",
+    "check": "node --check public/config.js && node --check public/app.js && node --check public/copy.js && node --check public/results-controls.js && node --check public/import.js",
+    "check:errors": "node --check public/config.js && node --check public/app.js && node --test test/error-classification.test.js",
     "test": "node --test test/"
   },
   "license": "MIT"

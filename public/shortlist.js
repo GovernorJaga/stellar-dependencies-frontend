@@ -5,6 +5,10 @@
  *
  * These functions intentionally contain no DOM or network access so they can
  * be imported directly by Node's test runner as well as used in the browser.
+ *
+ * The API base URL is configured in `config.js` (see `window.APP_CONFIG` /
+ * `apiBaseUrl`); this module never hardcodes a host. Any network access is
+ * performed by callers using that configurable base URL.
  */
 
 /**

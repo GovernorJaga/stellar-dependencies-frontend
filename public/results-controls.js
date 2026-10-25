@@ -220,6 +220,30 @@
     };
   }
 
+  function getApiBaseUrl() {
+    if (global && global.AppConfig && typeof global.AppConfig.getApiBaseUrl === 'function') {
+      return global.AppConfig.getApiBaseUrl();
+    }
+    if (global && global.AppConfig && typeof global.AppConfig.apiBaseUrl === 'string') {
+      return global.AppConfig.apiBaseUrl;
+    }
+    return '';
+  }
+
+  function buildApiUrl(path) {
+    var base = getApiBaseUrl();
+    var normalizedPath = normalizeString(path);
+    if (!base) {
+      return normalizedPath;
+    }
+    if (/^https?:\/\//i.test(normalizedPath)) {
+      return normalizedPath;
+    }
+    var trimmedBase = base.replace(/\/+$/, '');
+    var trimmedPath = normalizedPath.replace(/^\/+/, '');
+    return trimmedBase + '/' + trimmedPath;
+  }
+
   function createElement(tag, attributes, children) {
     var el = document.createElement(tag);
     if (attributes) {
@@ -482,6 +506,8 @@
     collectLicenses: collectLicenses,
     createMemoizedDerivation: createMemoizedDerivation,
     compareVersions: compareVersions,
+    getApiBaseUrl: getApiBaseUrl,
+    buildApiUrl: buildApiUrl,
     SORT_OPTIONS: SORT_OPTIONS,
     MAPPING_OPTIONS: MAPPING_OPTIONS,
     SELECTED_OPTIONS: SELECTED_OPTIONS
