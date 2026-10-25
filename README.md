@@ -15,6 +15,7 @@ This repository is one of three:
 - Responsive interface, search and package selection.
 - Report JSON and deduplicated shortlist JSON export.
 - Clearly labeled offline demonstration (**Try sample data**). Demo packages and repository URLs are fictional.
+- Visible caveat in the report noting that package metadata comes from each package's latest npm release and may differ from the installed version; the installed version is shown when the backend provides it.
 
 ## Project structure
 
